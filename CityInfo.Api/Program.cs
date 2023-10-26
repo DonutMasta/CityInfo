@@ -1,4 +1,5 @@
 using System.Reflection;
+using CityInfo.Api;
 using MediatR;
 using MediatR.Pipeline;
 using Microsoft.AspNetCore.StaticFiles;
@@ -13,10 +14,10 @@ var container = new SimpleInjector.Container();
 container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
 container.Options.DefaultLifestyle = Lifestyle.Scoped;
 
-builder.Services.AddControllers().AddNewtonsoftJson();
+builder.Services.AddControllers(options => options.Filters.Add(typeof(ExceptionFilter))).AddNewtonsoftJson();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options => options.CustomSchemaIds(x => x.FullName));
+builder.Services.AddSwaggerGen(options => options.CustomSchemaIds(x => x.FullName?.Replace("+","-")));
 builder.Services.AddSimpleInjector(container, options =>
 {
     options.AddAspNetCore().AddControllerActivation();

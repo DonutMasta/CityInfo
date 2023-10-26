@@ -1,6 +1,6 @@
-
-
+using CityInfo.Api.Business.City;
 using CityInfo.Api.Models;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CityInfo.Api.Controllers;
@@ -9,19 +9,12 @@ namespace CityInfo.Api.Controllers;
 [Route("api/[controller]")]
 public class CitiesController : ControllerBase
 {
+    private readonly IMediator mediator;
+    public CitiesController(IMediator mediator) => this.mediator = mediator;
+
     [HttpGet]
-    public ActionResult<IEnumerable<CityDto>> GetCities()
-    {
-        return Ok(CitiesDataStore.Current.Cities);
-    }
+    public async Task<GetCities.Result> GetCities() => await mediator.Send(new GetCities());
 
     [HttpGet("{id}")]
-    public ActionResult<CityDto> GetCityById(int id)
-    {
-        var result = CitiesDataStore.Current.Cities.FirstOrDefault(x => x.Id == id);
-        if (result == null)
-            return NotFound();
-
-        return Ok(result);
-    }
+    public async Task<CityDto> GetCityById(int id) => await mediator.Send(new GetCityById(id));
 }

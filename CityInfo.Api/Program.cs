@@ -1,8 +1,10 @@
 using System.Reflection;
 using CityInfo.Api;
+using CityInfo.Api.DbContexts;
 using MediatR;
 using MediatR.Pipeline;
 using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.EntityFrameworkCore;
 using SimpleInjector;
 using SimpleInjector.Lifestyles;
 using Container = System.ComponentModel.Container;
@@ -16,8 +18,11 @@ container.Options.DefaultLifestyle = Lifestyle.Scoped;
 
 builder.Services.AddControllers(options => options.Filters.Add(typeof(ExceptionFilter))).AddNewtonsoftJson();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+builder.Services.AddDbContext<CityInfoContext>(dbContextOptions =>
+    dbContextOptions.UseSqlite(builder.Configuration["ConnectionStrings:CityInfoConnection"]));
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options => options.CustomSchemaIds(x => x.FullName?.Replace("+","-")));
+builder.Services.AddSwaggerGen(options => options.CustomSchemaIds(x => x.FullName?.Replace("+", "-")));
 builder.Services.AddSimpleInjector(container, options =>
 {
     options.AddAspNetCore().AddControllerActivation();
@@ -27,7 +32,7 @@ builder.Services.AddSimpleInjector(container, options =>
     container.RegisterSingleton<IMediator, Mediator>();
     container.Register(typeof(IRequestHandler<,>), mediatorAssemblies);
 
-    container.Collection.Register(typeof(IPipelineBehavior<,>),new[]
+    container.Collection.Register(typeof(IPipelineBehavior<,>), new[]
     {
         typeof(RequestPreProcessorBehavior<,>),
         typeof(RequestPostProcessorBehavior<,>)
@@ -38,7 +43,6 @@ builder.Services.AddSimpleInjector(container, options =>
     container.RegisterInstance(new FileExtensionContentTypeProvider());
 
     options.AutoCrossWireFrameworkComponents = true;
-
 });
 var app = builder.Build();
 

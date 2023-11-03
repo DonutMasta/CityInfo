@@ -12,6 +12,7 @@ public class CityInfoContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<City>().Navigation(x => x.PointsOfInterest).AutoInclude();
         modelBuilder.Entity<City>().HasData(new City("Dornbirn"){
                 Id = 1,
                 Description = "Where the FHV is located"

@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using Fusonic.Extensions.Common.Entities;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace CityInfo.Api;
@@ -15,7 +16,7 @@ public class ExceptionFilter : IAsyncExceptionFilter
 
     public virtual Task OnExceptionAsync(ExceptionContext context)
     {
-        HandleException<InvalidOperationException>(context, HttpStatusCode.NotFound, e => new { e.Message });
+        HandleException<EntityNotFoundException>(context, HttpStatusCode.NotFound, e => new { e.Message });
         return Task.CompletedTask;
     }
 

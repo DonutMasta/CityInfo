@@ -1,4 +1,6 @@
+using CityInfo.Api.DbContexts;
 using CityInfo.Api.Models;
+using Fusonic.Extensions.EntityFrameworkCore;
 using Fusonic.Extensions.MediatR;
 using MediatR;
 
@@ -8,8 +10,11 @@ public record GetPointOfInterest(int CityId, int PoiId) : IQuery<PointOfInterest
 {
     public class Handler : IRequestHandler<GetPointOfInterest, PointOfInterestDto>
     {
-        public Task<PointOfInterestDto> Handle(GetPointOfInterest request, CancellationToken cancellationToken) =>
-            Task.FromResult(CitiesDataStore.Current.Cities.Single(x => x.Id == request.CityId).PointsOfInterest
-                .Single(x => x.Id == request.PoiId));
+        private readonly CityInfoContext context;
+        public Handler(CityInfoContext context) => this.context = context;
+
+        public async Task<PointOfInterestDto> Handle(GetPointOfInterest request, CancellationToken cancellationToken) =>
+            new PointOfInterestDto(await context.PointsOfInterest.SingleRequiredAsync(
+                x => x.Id == request.PoiId && x.CityId == request.CityId, cancellationToken));
     }
 }

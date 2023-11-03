@@ -1,4 +1,6 @@
+using CityInfo.Api.DbContexts;
 using CityInfo.Api.Models;
+using Fusonic.Extensions.EntityFrameworkCore;
 using Fusonic.Extensions.MediatR;
 using MediatR;
 
@@ -8,19 +10,19 @@ public record AddPointOfInterest(string Name, string? Description, int CityId) :
 {
     public class Handler : IRequestHandler<AddPointOfInterest, PointOfInterestDto>
     {
-        public Task<PointOfInterestDto> Handle(AddPointOfInterest request, CancellationToken cancellationToken)
+        private readonly CityInfoContext context;
+        public Handler(CityInfoContext context) => this.context = context;
+        public async Task<PointOfInterestDto> Handle(AddPointOfInterest request, CancellationToken cancellationToken)
         {
-            var city = CitiesDataStore.Current.Cities.Single(x => x.Id == request.CityId);
-            var nextId = CitiesDataStore.Current.Cities.SelectMany(x => x.PointsOfInterest).Select(x => x.Id).Max() + 1;
+            var city = await context.Cities.SingleRequiredAsync(x => x.Id == request.CityId, cancellationToken);
 
-            var poi = new PointOfInterestDto()
+            var poi = new Entities.PointOfInterest(request.Name)
             {
-                Id = nextId,
-                Name = request.Name,
                 Description = request.Description
             };
             city.PointsOfInterest.Add(poi);
-            return Task.FromResult(poi);
+            await context.SaveChangesAsync(cancellationToken);
+            return new PointOfInterestDto(poi);
         }
     }
 }

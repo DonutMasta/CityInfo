@@ -1,4 +1,6 @@
 
+using CityInfo.Api.DbContexts;
+using Fusonic.Extensions.EntityFrameworkCore;
 using Fusonic.Extensions.MediatR;
 using MediatR;
 
@@ -8,12 +10,15 @@ public record UpdatePoiDescription(int CityId, int PoiId, string? Description): 
 {
     public class Handler : IRequestHandler<UpdatePoiDescription>
     {
-        public Task<Unit> Handle(UpdatePoiDescription request, CancellationToken cancellationToken)
+        private readonly CityInfoContext context;
+        public Handler(CityInfoContext context) => this.context = context;
+        public async Task<Unit> Handle(UpdatePoiDescription request, CancellationToken cancellationToken)
         {
-            var poi = CitiesDataStore.Current.Cities.Single(x => x.Id == request.CityId).PointsOfInterest
-                .Single(x => x.Id == request.PoiId);
-            poi.Description = request.Description;
-            return Task.FromResult<Unit>(default);
+            
+          var poi = await context.PointsOfInterest.SingleRequiredAsync(x => x.Id == request.PoiId && x.CityId == request.CityId, cancellationToken);
+          poi.Description = request.Description;
+          await context.SaveChangesAsync(cancellationToken);
+          return default;   
         }
     }
     

@@ -1,9 +1,10 @@
 using CityInfo.Api.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace CityInfo.Api.DbContexts;
 
-public class CityInfoContext : DbContext
+public class CityInfoContext : IdentityDbContext<User>
 {
     public DbSet<City> Cities { get; set; } = null!;
     public DbSet<PointOfInterest> PointsOfInterest { get; set; } = null!;
@@ -12,6 +13,7 @@ public class CityInfoContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+
         modelBuilder.Entity<City>().Navigation(x => x.PointsOfInterest).AutoInclude();
         modelBuilder.Entity<City>().HasData(new City("Dornbirn"){
                 Id = 1,
@@ -64,5 +66,6 @@ public class CityInfoContext : DbContext
                 Description = "The worst beer in Vbg"
             });
         base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<City>().Navigation(x=>x.PointsOfInterest).AutoInclude();
     }
 }

@@ -1,6 +1,7 @@
 using CityInfo.Api.Business.City;
 using CityInfo.Api.Models;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
@@ -14,6 +15,7 @@ public class CitiesController : ControllerBase
     public CitiesController(IMediator mediator) => this.mediator = mediator;
 
     [HttpGet]
+    [Authorize(Policy = "MustBeSuperDuperUser")]
     public async Task<GetCities.Result> GetCities(string? name, string? searchQuery, int pageNumber = 1,
         int pageSize = 10)
     {
@@ -23,5 +25,6 @@ public class CitiesController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [Authorize]
     public async Task<CityDto> GetCityById(int id) => await mediator.Send(new GetCityById(id));
 }

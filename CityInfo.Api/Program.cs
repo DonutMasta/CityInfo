@@ -1,12 +1,16 @@
 using System.Reflection;
+using System.Security.Claims;
+using System.Text;
 using CityInfo.Api;
 using CityInfo.Api.DbContexts;
 using CityInfo.Api.Entities;
 using MediatR;
 using MediatR.Pipeline;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using SimpleInjector;
 using SimpleInjector.Lifestyles;
 using Container = System.ComponentModel.Container;
@@ -34,6 +38,25 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
     options.User.RequireUniqueEmail = true;
 }).AddEntityFrameworkStores<CityInfoContext>().AddDefaultTokenProviders();
 
+builder.Services.AddAuthorization(options => options.AddPolicy("MustBeSuperDuperUser",
+    policy => policy.RequireAuthenticatedUser().RequireClaim(ClaimTypes.Name, "SuperDuperUser")));
+
+var jwtConfig = builder.Configuration.GetSection("JwtConfig");
+var secret = jwtConfig["Secret"];
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options => options.TokenValidationParameters = new TokenValidationParameters
+{
+    ValidateIssuer = true,
+    ValidateAudience = true,
+    ValidateLifetime = true,
+    ValidateIssuerSigningKey = true,
+    ValidIssuer = jwtConfig["validIssuer"],
+    ValidAudience = jwtConfig["validAudience"],
+    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret!))
+});
 
 builder.Services.AddSimpleInjector(container, options =>
 {

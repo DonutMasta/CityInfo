@@ -1,9 +1,10 @@
 using System.ComponentModel.DataAnnotations;
+using CityInfo.Api.Business.PointOfInterest;
 using CityInfo.Api.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CityInfo.Api.Business.PointOfInterestController;
+namespace CityInfo.Api.Controllers;
 
 [Route("api/cities/{cityId}/[controller]")]
 [ApiController]

@@ -1,10 +1,9 @@
-
 using CityInfo.Api.DbContexts;
 using Fusonic.Extensions.EntityFrameworkCore;
 using Fusonic.Extensions.MediatR;
 using MediatR;
 
-namespace CityInfo.Api.Business.PointOfInterestController;
+namespace CityInfo.Api.Business.PointOfInterest;
 
 public record UpdatePoiDescription(int CityId, int PoiId, string? Description): ICommand
 {

@@ -4,7 +4,7 @@ using Fusonic.Extensions.EntityFrameworkCore;
 using Fusonic.Extensions.MediatR;
 using MediatR;
 
-namespace CityInfo.Api.Business.PointOfInterestController;
+namespace CityInfo.Api.Business.PointOfInterest;
 
 public record AddPointOfInterest(string Name, string? Description, int CityId) : ICommand<PointOfInterestDto>
 {
